@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'coin_data.dart';
+
+// import 'dart:io' show Platform;
 
 class PriceScreen extends StatefulWidget {
   @override
@@ -7,9 +10,22 @@ class PriceScreen extends StatefulWidget {
 }
 
 class _PriceScreenState extends State<PriceScreen> {
-  String SelectedCurrency = 'USD';
+  String dollerPrice;
+  String selectedCurrency = 'USD';
 
-  List<DropdownMenuItem> getDropdownItems() {
+  // String PriceChecker(String fiat, String crypto) {
+  //
+  Future<String> PriceChecker(var selectedCurrency) async {
+    CoinData btctousd = CoinData(
+        'https://api.nomics.com/v1/currencies/ticker?key=3db103ef8cc6cba1c93f75f81c5e1d8c5f5482ad&ids=BTC&convert=$selectedCurrency');
+    // return Text(
+    //   '65000.45'
+    // );
+    var jsonData = await btctousd.getData();
+    return dollerPrice = jsonData[0]['price'];
+  }
+
+  DropdownButton<String> androidDropDownList() {
     List<DropdownMenuItem<String>> dropDownItemList = [];
     for (String currencyItems in currenciesList) {
       var item =
@@ -17,7 +33,45 @@ class _PriceScreenState extends State<PriceScreen> {
       dropDownItemList.add(item);
     }
 
-    return dropDownItemList;
+    return DropdownButton<String>(
+        value: selectedCurrency,
+        items: dropDownItemList,
+        onChanged: (selectItem) async {
+          var currency = await PriceChecker(selectItem);
+          // print(dropDownItemList[currency]);
+          setState(() {
+            selectedCurrency = selectItem;
+            dollerPrice = currency;
+          });
+        });
+  }
+
+  CupertinoPicker iosPicker() {
+    List<Text> iosItemList = [];
+
+    for (String i in currenciesList) {
+      var item = Text(i);
+      iosItemList.add(item);
+    }
+
+    return CupertinoPicker(
+      itemExtent: 32.0,
+      children: iosItemList,
+      onSelectedItemChanged: (item) async {
+        print(iosItemList[item]);
+
+        var doller = await PriceChecker(selectedCurrency);
+        setState(() {
+          dollerPrice = doller;
+        });
+      },
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    PriceChecker(selectedCurrency);
   }
 
   @override
@@ -41,7 +95,7 @@ class _PriceScreenState extends State<PriceScreen> {
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
                 child: Text(
-                  '1 BTC = ? USD',
+                  '1 BTC = $dollerPrice $selectedCurrency',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20.0,
@@ -56,14 +110,8 @@ class _PriceScreenState extends State<PriceScreen> {
             alignment: Alignment.center,
             padding: EdgeInsets.only(bottom: 30.0),
             color: Colors.lightBlue,
-            child: DropdownButton<String>(
-                value: SelectedCurrency,
-                items: getDropdownItems(),
-                onChanged: (select_item) {
-                  setState(() {
-                    SelectedCurrency = select_item;
-                  });
-                }),
+            // child: Platform.isIOS ? iosPicker() : androidDropDownList(),
+            child: androidDropDownList(),
           ),
         ],
       ),
