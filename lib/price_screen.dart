@@ -11,13 +11,15 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String dollerPrice;
+  String ETHPrice = '000';
+  String BNB = '000';
   String selectedCurrency = 'USD';
 
   // String PriceChecker(String fiat, String crypto) {
   //
-  Future<String> PriceChecker(var selectedCurrency) async {
-    CoinData btctousd = CoinData(
-        'https://api.nomics.com/v1/currencies/ticker?key=3db103ef8cc6cba1c93f75f81c5e1d8c5f5482ad&ids=BTC&convert=$selectedCurrency');
+  Future<String> PriceChecker(var selectedCurrency, var crypto) async {
+    CoinData btctousd = await CoinData(
+        'https://api.nomics.com/v1/currencies/ticker?key=3db103ef8cc6cba1c93f75f81c5e1d8c5f5482ad&ids=$crypto&convert=$selectedCurrency');
     // return Text(
     //   '65000.45'
     // );
@@ -37,11 +39,15 @@ class _PriceScreenState extends State<PriceScreen> {
         value: selectedCurrency,
         items: dropDownItemList,
         onChanged: (selectItem) async {
-          var currency = await PriceChecker(selectItem);
+          var currency = await PriceChecker(selectItem, 'BTC');
+          var Eth = await PriceChecker(selectItem, 'ETH');
+          var BnB = await PriceChecker(selectedCurrency, 'BNB');
           // print(dropDownItemList[currency]);
           setState(() {
             selectedCurrency = selectItem;
             dollerPrice = currency;
+            ETHPrice = Eth;
+            BNB = BnB;
           });
         });
   }
@@ -60,9 +66,13 @@ class _PriceScreenState extends State<PriceScreen> {
       onSelectedItemChanged: (item) async {
         print(iosItemList[item]);
 
-        var doller = await PriceChecker(selectedCurrency);
+        var doller = await PriceChecker(selectedCurrency, 'BTC');
+        var Etheprice = await PriceChecker(selectedCurrency, 'ETH');
+        var BnbPrice = await PriceChecker(selectedCurrency, 'BNB');
         setState(() {
           dollerPrice = doller;
+          ETHPrice = Etheprice;
+          BNB = BnbPrice;
         });
       },
     );
@@ -71,7 +81,9 @@ class _PriceScreenState extends State<PriceScreen> {
   @override
   void initState() {
     super.initState();
-    PriceChecker(selectedCurrency);
+    PriceChecker(selectedCurrency, 'BTC');
+    PriceChecker(selectedCurrency, 'BNB');
+    PriceChecker(selectedCurrency, 'ETH');
   }
 
   @override
@@ -96,6 +108,48 @@ class _PriceScreenState extends State<PriceScreen> {
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
                 child: Text(
                   '1 BTC = $dollerPrice $selectedCurrency',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 20.0,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
+            child: Card(
+              color: Colors.lightBlueAccent,
+              elevation: 5.0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
+                child: Text(
+                  '1 ETH = $ETHPrice $selectedCurrency',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 20.0,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
+            child: Card(
+              color: Colors.lightBlueAccent,
+              elevation: 5.0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
+                child: Text(
+                  '1 BNB = $BNB $selectedCurrency',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20.0,
